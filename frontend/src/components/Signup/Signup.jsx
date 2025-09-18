@@ -12,7 +12,7 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/signup', formData);
+      const res = await axios.post('/api/auth/signup', formData);
       setMessage('Signup successful! Token: ' + res.data.token);
       // Store token in localStorage for future use: localStorage.setItem('token', res.data.token);
     } catch (err) {

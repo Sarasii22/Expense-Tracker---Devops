@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: expense_tracker_db
+
+  backend:
+    build: ./backend
+    container_name: backend
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongo
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/expense_tracker_db
+      - JWT_SECRET=${JWT_SECRET}  # Pulls from .env
+      - PORT=5000
+    env_file:
+      - .env  # Loads other vars if needed
+
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    ports:
+      - "3000:80"  # Expose on 3000, Nginx listens on 80 inside
+    depends_on:
+      - backend
