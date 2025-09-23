@@ -13,7 +13,7 @@ const Signup = () => {
     e.preventDefault();
     try {
       const res = await axios.post('http://localhost:5000/api/auth/signup', formData);
-      setMessage('Signup successful! Token: ' + res.data.token);
+      setMessage('Signup successful!');
       // Store token in localStorage for future use: localStorage.setItem('token', res.data.token);
     } catch (err) {
       setMessage(err.response?.data?.message || 'Error signing up');
