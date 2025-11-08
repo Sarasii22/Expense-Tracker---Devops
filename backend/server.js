@@ -10,6 +10,9 @@ connectDB();
 const app = express();
 app.use(cors()); // Allow frontend origin
 app.use(express.json());
+app.get('/', (req, res) => {
+  res.json({ message: 'Expense Tracker API is running!' });
+});
 
 app.use('/api/auth', authRoutes);
 
