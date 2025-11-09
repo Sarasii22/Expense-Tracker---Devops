@@ -1,9 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import axios from 'axios';
+import { AuthContext } from 'C:/EC5207 DevOps Engineering/New folder/Expense-Tracker---Devops/frontend/src/AuthContext.js';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [message, setMessage] = useState('');
+  const { login } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -13,8 +17,9 @@ const Login = () => {
     e.preventDefault();
     try {
       const res = await axios.post('/api/auth/login', formData);
+      login(res.data.token);
       setMessage('Login successful!');
-      // Store token: localStorage.setItem('token', res.data.token);
+      navigate('/expenses');
     } catch (err) {
       setMessage(err.response?.data?.message || 'Error logging in');
     }
