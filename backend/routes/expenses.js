@@ -16,10 +16,33 @@ const authMiddleware = (req, res, next) => {
   }
 };
 
-// Get all expenses for user
+// Get all expenses for user (with optional filters)
 router.get('/', authMiddleware, async (req, res) => {
   try {
-    const expenses = await Expense.find({ user: req.user }).sort({ date: -1 });
+    const { category, period } = req.query;
+    let filter = { user: req.user };
+
+    if (category && category !== 'All') {
+      filter.category = category;
+    }
+
+    if (period && period !== 'All') {
+      let startDate;
+      const now = new Date();
+      if (period === 'Today') {
+        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      } else if (period === 'This Week') {
+        const day = now.getDay();
+        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - day);
+      } else if (period === 'This Month') {
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+      }
+      if (startDate) {
+        filter.date = { $gte: startDate };
+      }
+    }
+
+    const expenses = await Expense.find(filter).sort({ date: -1 });
     res.json(expenses);
   } catch (err) {
     res.status(500).json({ message: 'Server error' });

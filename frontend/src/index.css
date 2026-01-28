@@ -120,6 +120,30 @@ h1 a:hover {
   text-decoration: underline;
   color: #2980b9;
 }
+/* Custom category badges */
+.badge-food { background-color: #28a745; } /* Green */
+.badge-transport { background-color: #007bff; } /* Blue */
+.badge-utilities { background-color: #ffc107; } /* Yellow */
+.badge-entertainment { background-color: #dc3545; } /* Red */
+.badge-other { background-color: #6f42c1; } /* Purple */
+
+/* Dashboard container */
+.dashboard-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Form and filters */
+.form-group { margin-bottom: 15px; }
+
+/* Total display */
+.total-expenses {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #333;
+  margin-top: 20px;
+}
 
 /* Responsive design */
 @media (max-width: 576px) {

@@ -1,0 +1,105 @@
+[{
+  "_id": {
+    "$oid": "691090c196926dda797fcfb8"
+  },
+  "user": {
+    "$oid": "68ccec3fcd0877a0676219c0"
+  },
+  "description": "food - home",
+  "amount": 45,
+  "category": "food",
+  "date": {
+    "$date": "2025-11-09T13:01:53.461Z"
+  },
+  "createdAt": {
+    "$date": "2025-11-09T13:01:53.461Z"
+  },
+  "updatedAt": {
+    "$date": "2026-01-27T16:11:42.577Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6978edf40ac3699687e3319a"
+  },
+  "user": {
+    "$oid": "68ccec3fcd0877a0676219c0"
+  },
+  "description": "q",
+  "amount": 5,
+  "category": "Utilities",
+  "date": {
+    "$date": "2026-01-27T16:55:16.756Z"
+  },
+  "createdAt": {
+    "$date": "2026-01-27T16:55:16.759Z"
+  },
+  "updatedAt": {
+    "$date": "2026-01-27T16:55:16.759Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6978f38325331de9b7fa4be7"
+  },
+  "user": {
+    "$oid": "68ccec3fcd0877a0676219c0"
+  },
+  "description": "r",
+  "amount": 4,
+  "category": "Transport",
+  "date": {
+    "$date": "2026-01-27T17:18:59.459Z"
+  },
+  "createdAt": {
+    "$date": "2026-01-27T17:18:59.462Z"
+  },
+  "updatedAt": {
+    "$date": "2026-01-27T17:18:59.462Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6979dfd4f206db84b04e01ff"
+  },
+  "user": {
+    "$oid": "68ccec3fcd0877a0676219c0"
+  },
+  "description": "food",
+  "amount": 11,
+  "category": "Food",
+  "date": {
+    "$date": "2026-01-28T10:07:16.775Z"
+  },
+  "createdAt": {
+    "$date": "2026-01-28T10:07:16.781Z"
+  },
+  "updatedAt": {
+    "$date": "2026-01-28T10:07:16.781Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6979e107f206db84b04e0217"
+  },
+  "user": {
+    "$oid": "68ccec3fcd0877a0676219c0"
+  },
+  "description": "sdf",
+  "amount": 4,
+  "category": "Entertainment",
+  "date": {
+    "$date": "2026-01-28T10:12:23.756Z"
+  },
+  "createdAt": {
+    "$date": "2026-01-28T10:12:23.756Z"
+  },
+  "updatedAt": {
+    "$date": "2026-01-28T10:12:23.756Z"
+  },
+  "__v": 0
+}]

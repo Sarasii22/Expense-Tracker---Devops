@@ -1,7 +1,6 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-
 const router = express.Router();
 
 // Signup
@@ -24,19 +23,27 @@ router.post('/signup', async (req, res) => {
   }
 });
 
-// Login
+// Login (with debug logs)
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
-  const trimmedEmail = email.trim().toLowerCase(); // Normalize email
+  const trimmedEmail = email.trim().toLowerCase();
+  console.log(`Login attempt with email: ${trimmedEmail}`); // Debug
   try {
     const user = await User.findOne({ email: trimmedEmail });
-    if (!user) return res.status(400).json({ message: 'Invalid credentials' });
+    if (!user) {
+      console.log(`User not found for email: ${trimmedEmail}`); // Debug
+      return res.status(400).json({ message: 'Invalid credentials' });
+    }
+    console.log(`User found: ${user._id}, checking password...`); // Debug
     const isMatch = await user.comparePassword(password);
-    if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
+    if (!isMatch) {
+      console.log(`Password mismatch for user: ${user._id}`); // Debug
+      return res.status(400).json({ message: 'Invalid credentials' });
+    }
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
     res.json({ token, user: { id: user._id, username: user.username, email: trimmedEmail } });
   } catch (err) {
-    console.error(err);
+    console.error(`Login error: ${err.message}`); // Improved
     res.status(500).json({ message: 'Server error' });
   }
 });
