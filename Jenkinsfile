@@ -24,16 +24,15 @@ pipeline {
             }
         }
 
-        stage('Deploy Locally') {
-            steps {
-                sh 'docker-compose down -v || true'  // Remove volumes too if needed (resets data, optional)
-                sh 'docker rm -f mongo backend frontend || true'  // Force remove any stuck containers
-                sh 'docker-compose up -d'
-                echo 'App deployed! Check http://localhost:3000 (or Jenkins server IP)'
-            }
+    stage('Deploy Locally') {
+        steps {
+            sh 'docker-compose down || true'  // Stop without removing volumes
+            sh 'docker rm -f mongo backend frontend || true'  // Force remove containers if stuck
+            sh 'docker-compose up -d'
+            echo 'App deployed! Check http://localhost:3000 (or Jenkins server IP)'
         }
     }
-
+    }
     post {
         success { echo 'Success! App is running.' }
         failure { echo 'Failed—check logs with docker-compose logs.' }
