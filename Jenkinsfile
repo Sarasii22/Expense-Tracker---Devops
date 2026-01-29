@@ -24,10 +24,11 @@ pipeline {
             }
         }
 
-        stage('Deploy Locally') {  // For testing; replace with AWS in Part 3
+        stage('Deploy Locally') {
             steps {
-                sh 'docker-compose down || true'  // Safe stop
-                sh 'docker-compose up -d'  // Use existing builds, detach
+                sh 'docker-compose down -v || true'  // Remove volumes too if needed (resets data, optional)
+                sh 'docker rm -f mongo backend frontend || true'  // Force remove any stuck containers
+                sh 'docker-compose up -d'
                 echo 'App deployed! Check http://localhost:3000 (or Jenkins server IP)'
             }
         }
