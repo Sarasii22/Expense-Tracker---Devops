@@ -3,13 +3,7 @@ pipeline {
 
     environment {
         JWT_SECRET = credentials('jwt-secret')
-
-        DOCKERHUB_USER = "sarasii"
-        BACKEND_IMAGE = "sarasii/expense-backend:latest"
-        FRONTEND_IMAGE = "sarasii/expense-frontend:latest"
-
-        EC2_IP = "54.243.18.183"
-        SSH_KEY = "~/.ssh/expense-key.pem"
+        DOCKER_CREDS = credentials('dockerhub-creds')
     }
 
     stages {
@@ -22,48 +16,36 @@ pipeline {
 
         stage('Build Images') {
             steps {
-                sh 'docker build -t $BACKEND_IMAGE ./backend'
-                sh 'docker build -t $FRONTEND_IMAGE ./frontend'
+                sh 'docker build -t sarasii/expense-backend:latest ./backend'
+                sh 'docker build -t sarasii/expense-frontend:latest ./frontend'
             }
         }
 
-        stage('Push Images to DockerHub') {
+        stage('Docker Login') {
             steps {
-                sh 'docker push $BACKEND_IMAGE'
-                sh 'docker push $FRONTEND_IMAGE'
+                sh '''
+                echo $DOCKER_CREDS_PSW | docker login -u $DOCKER_CREDS_USR --password-stdin
+                '''
             }
         }
 
-        stage('Deploy to EC2') {
+        stage('Push Images') {
             steps {
-                sh """
-                ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ec2-user@${EC2_IP} << 'EOF'
+                sh 'docker push sarasii/expense-backend:latest'
+                sh 'docker push sarasii/expense-frontend:latest'
+            }
+        }
 
-                docker pull ${BACKEND_IMAGE}
-                docker pull ${FRONTEND_IMAGE}
-
+        stage('Deploy') {
+            steps {
+                sh '''
                 docker stop backend frontend || true
                 docker rm backend frontend || true
 
-                docker run -d --restart unless-stopped --name backend -p 5000:5000 \
-                  -e JWT_SECRET=${JWT_SECRET} \
-                  ${BACKEND_IMAGE}
-
-                docker run -d --restart unless-stopped --name frontend -p 80:80 \
-                  ${FRONTEND_IMAGE}
-
-                EOF
-                """
+                docker run -d --name backend -p 5000:5000 sarasii/expense-backend:latest
+                docker run -d --name frontend -p 80:80 sarasii/expense-frontend:latest
+                '''
             }
-        }
-    }
-
-    post {
-        success {
-            echo "Deployment successful! Check http://${EC2_IP}"
-        }
-        failure {
-            echo "Deployment failed. Check logs."
         }
     }
 }
