@@ -32,37 +32,42 @@ pipeline {
         stage('Deploy') {
             steps {
                 sh '''
-                    echo "=== FORCE CLEANUP (this fixes the port error) ==="
+                    echo "=== SUPER AGGRESSIVE PORT CLEANUP ==="
                     docker stop mongo backend frontend 2>/dev/null || true
                     docker rm -f mongo backend frontend 2>/dev/null || true
+                    docker rm -f $(docker ps -a -q) 2>/dev/null || true
                     
-                    # Kill ANY container using the ports
-                    docker ps -q --filter "publish=5000" | xargs -r docker rm -f || true
-                    docker ps -q --filter "publish=80" | xargs -r docker rm -f || true
+                    echo "=== CURRENT PORTS BEFORE KILL ==="
+                    ss -tlnp | grep -E '5000|80' || echo "No ports bound"
                     
-                    # Aggressive port kill (fixes ghost ports)
-                    fuser -k 5000/tcp 2>/dev/null || true
-                    fuser -k 80/tcp 2>/dev/null || true
+                    echo "=== KILLING ANY PROCESS ON 5000 & 80 ==="
+                    for port in 5000 80; do
+                        PID=$(ss -tlnp | grep ":$port " | awk '{print $7}' | cut -d, -f2 | cut -d= -f2 || true)
+                        if [ -n "$PID" ]; then
+                            echo "Killing PID $PID on port $port"
+                            kill -9 $PID 2>/dev/null || true
+                        fi
+                    done
                     
-                    echo "=== Waiting for ports to free (5s) ==="
-                    sleep 5
+                    echo "=== WAITING FOR PORTS TO FULLY FREE (15s) ==="
+                    sleep 15
                     
-                    echo "=== Creating network ==="
+                    echo "=== CREATING NETWORK ==="
                     docker network create expense-net 2>/dev/null || true
                     
-                    echo "=== Starting MongoDB ==="
+                    echo "=== STARTING MONGODB ==="
                     docker run -d --restart unless-stopped --name mongo --network expense-net mongo:latest
                     
-                    echo "=== Waiting for MongoDB ==="
-                    for i in {1..30}; do
+                    echo "=== WAITING FOR MONGODB ==="
+                    for i in {1..40}; do
                         if docker run --rm --network expense-net busybox sh -c "nc -z mongo 27017" 2>/dev/null; then
-                            echo "MongoDB is ready!"
+                            echo "MongoDB ready!"
                             break
                         fi
                         sleep 1
                     done
                     
-                    echo "=== Starting Backend ==="
+                    echo "=== STARTING BACKEND ==="
                     docker run -d --restart unless-stopped --name backend \
                         --network expense-net \
                         -p 5000:5000 \
@@ -71,25 +76,26 @@ pipeline {
                         -e PORT=5000 \
                         sarasii/expense-backend:latest
                     
-                    echo "=== Starting Frontend ==="
+                    echo "=== STARTING FRONTEND ==="
                     docker run -d --restart unless-stopped --name frontend \
                         --network expense-net \
                         -p 80:80 \
                         sarasii/expense-frontend:latest
                     
-                    echo "=== SUCCESS! Checking status ==="
+                    echo "=== FINAL STATUS ==="
                     docker ps
-                    echo "App is live at: http://$(curl -s ifconfig.me)"
-                    echo "Backend health: $(curl -s -o /dev/null -w "%{http_code}" http://localhost:5000 || echo "FAILED")"
+                    echo "APP LIVE AT: http://$(curl -s ifconfig.me)"
+                    echo "Backend check: $(curl -s -o /dev/null -w "%{http_code}" http://localhost:5000 || echo "DOWN")"
                 '''
             }
         }
     }
     post {
-        success { echo '✅ DEPLOYMENT COMPLETE' }
+        success { echo '✅ SUCCESS — CHECK THE URL ABOVE!' }
         failure { 
-            echo '❌ FAILED — run this on server: docker logs backend'
+            echo '❌ FAILED'
             sh 'docker logs backend || true'
+            sh 'ss -tlnp | grep -E "5000|80" || true'
         }
     }
 }
