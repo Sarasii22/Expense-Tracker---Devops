@@ -25,37 +25,37 @@ pipeline {
             steps {
                 sshagent(['aws-ec2-key']) {
                     sh '''
-                    ssh -o StrictHostKeyChecking=no ec2-user@54.243.18.183 << 'EOF'
-                    docker pull sarasii/expense-backend:latest
-                    docker pull sarasii/expense-frontend:latest
-                    
-                    docker stop mongo backend frontend || true
-                    docker rm mongo backend frontend || true
-                    
-                    docker network create expense-net || true
-                    
-                    docker run -d --restart unless-stopped --name mongo --network expense-net mongo:latest
-                    
-                    sleep 10
-                    
-                    docker run -d --restart unless-stopped --name backend --network expense-net -p 5000:5000 \
-                      -e MONGO_URI=mongodb://mongo:27017/expense-tracker \
-                      -e JWT_SECRET=${JWT_SECRET} \
-                      -e PORT=5000 \
-                      sarasii/expense-backend:latest
-                    
-                    docker run -d --restart unless-stopped --name frontend --network expense-net -p 80:80 sarasii/expense-frontend:latest
-                    
-                    echo "Deploy complete on AWS!"
-                    docker ps
-                    EOF
+                    ssh -o StrictHostKeyChecking=no ec2-user@54.243.18.183 << EOF
+docker pull sarasii/expense-backend:latest
+docker pull sarasii/expense-frontend:latest
+
+docker stop mongo backend frontend || true
+docker rm mongo backend frontend || true
+
+docker network create expense-net || true
+
+docker run -d --restart unless-stopped --name mongo --network expense-net mongo:latest
+
+sleep 10
+
+docker run -d --restart unless-stopped --name backend --network expense-net -p 5000:5000 \
+  -e MONGO_URI=mongodb://mongo:27017/expense-tracker \
+  -e JWT_SECRET=${JWT_SECRET} \
+  -e PORT=5000 \
+  sarasii/expense-backend:latest
+
+docker run -d --restart unless-stopped --name frontend --network expense-net -p 80:80 sarasii/expense-frontend:latest
+
+echo "Deploy SUCCESS!"
+docker ps
+EOF
                     '''
                 }
             }
         }
     }
     post {
-        success { echo '✅ Changes LIVE on http://54.243.18.183' }
-        failure { echo '❌ Deploy failed - check logs' }
+        success { echo '✅ FULLY AUTOMATIC DEPLOY COMPLETE — LIVE ON http://54.243.18.183' }
+        failure { echo 'Check logs' }
     }
 }
