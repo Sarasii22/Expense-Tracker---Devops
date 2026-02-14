@@ -32,9 +32,20 @@ pipeline {
         stage('Deploy') {
             steps {
                 sh '''
-                    echo "=== Stopping old containers ==="
+                    echo "=== FORCE CLEANUP (this fixes the port error) ==="
                     docker stop mongo backend frontend 2>/dev/null || true
-                    docker rm mongo backend frontend 2>/dev/null || true
+                    docker rm -f mongo backend frontend 2>/dev/null || true
+                    
+                    # Kill ANY container using the ports
+                    docker ps -q --filter "publish=5000" | xargs -r docker rm -f || true
+                    docker ps -q --filter "publish=80" | xargs -r docker rm -f || true
+                    
+                    # Aggressive port kill (fixes ghost ports)
+                    fuser -k 5000/tcp 2>/dev/null || true
+                    fuser -k 80/tcp 2>/dev/null || true
+                    
+                    echo "=== Waiting for ports to free (5s) ==="
+                    sleep 5
                     
                     echo "=== Creating network ==="
                     docker network create expense-net 2>/dev/null || true
@@ -42,7 +53,7 @@ pipeline {
                     echo "=== Starting MongoDB ==="
                     docker run -d --restart unless-stopped --name mongo --network expense-net mongo:latest
                     
-                    echo "=== Waiting for MongoDB (max 30s) ==="
+                    echo "=== Waiting for MongoDB ==="
                     for i in {1..30}; do
                         if docker run --rm --network expense-net busybox sh -c "nc -z mongo 27017" 2>/dev/null; then
                             echo "MongoDB is ready!"
@@ -66,18 +77,19 @@ pipeline {
                         -p 80:80 \
                         sarasii/expense-frontend:latest
                     
-                    echo "=== Deployment done! ==="
-                    echo "App should be live at: http://$(curl -s ifconfig.me)"
+                    echo "=== SUCCESS! Checking status ==="
+                    docker ps
+                    echo "App is live at: http://$(curl -s ifconfig.me)"
+                    echo "Backend health: $(curl -s -o /dev/null -w "%{http_code}" http://localhost:5000 || echo "FAILED")"
                 '''
             }
         }
     }
     post {
-        success {
-            echo '✅ SUCCESS! Check the console output for the IP'
-        }
-        failure {
-            echo '❌ Failed - check logs: docker logs backend'
+        success { echo '✅ DEPLOYMENT COMPLETE' }
+        failure { 
+            echo '❌ FAILED — run this on server: docker logs backend'
+            sh 'docker logs backend || true'
         }
     }
 }
