@@ -1,41 +1,69 @@
 pipeline {
-    agent any  // Runs on any Jenkins agent with Docker/compose installed
+    agent any
 
     environment {
-        // Pull secrets from Jenkins credentials (add JWT_SECRET as 'secret text' cred ID: 'jwt-secret')
         JWT_SECRET = credentials('jwt-secret')
+
+        DOCKERHUB_USER = "sarasii"
+        BACKEND_IMAGE = "sarasii/expense-backend:latest"
+        FRONTEND_IMAGE = "sarasii/expense-frontend:latest"
+
+        EC2_IP = "54.243.18.183"
+        SSH_KEY = "~/.ssh/expense-key.pem"
     }
 
     stages {
+
         stage('Checkout Code') {
             steps {
-                // Pull from GitHub
                 checkout scm
             }
         }
 
         stage('Build Images') {
             steps {
-                // Write .env with secret (don't commit .env)
-                sh 'echo "JWT_SECRET=${JWT_SECRET}" > .env'
-                sh 'echo "PORT=5000" >> .env'
-                sh 'echo "MONGO_INITDB_DATABASE=expense-tracker" >> .env'
-                sh 'docker-compose build'
+                sh 'docker build -t $BACKEND_IMAGE ./backend'
+                sh 'docker build -t $FRONTEND_IMAGE ./frontend'
             }
         }
 
-    stage('Deploy Locally') {
-        steps {
-            sh 'docker-compose down || true'  // Stop without removing volumes
-            sh 'docker rm -f mongo backend frontend || true'  // Force remove containers if stuck
-            sh 'docker-compose up -d'
-            echo 'App deployed! Check http://localhost:3000 (or Jenkins server IP)'
+        stage('Push Images to DockerHub') {
+            steps {
+                sh 'docker push $BACKEND_IMAGE'
+                sh 'docker push $FRONTEND_IMAGE'
+            }
+        }
+
+        stage('Deploy to EC2') {
+            steps {
+                sh """
+                ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ec2-user@${EC2_IP} << 'EOF'
+
+                docker pull ${BACKEND_IMAGE}
+                docker pull ${FRONTEND_IMAGE}
+
+                docker stop backend frontend || true
+                docker rm backend frontend || true
+
+                docker run -d --restart unless-stopped --name backend -p 5000:5000 \
+                  -e JWT_SECRET=${JWT_SECRET} \
+                  ${BACKEND_IMAGE}
+
+                docker run -d --restart unless-stopped --name frontend -p 80:80 \
+                  ${FRONTEND_IMAGE}
+
+                EOF
+                """
+            }
         }
     }
-    }
+
     post {
-        success { echo 'Success! App is running.' }
-        failure { echo 'Failed—check logs with docker-compose logs.' }
-        always { sh 'rm -f .env' }  // Clean up secrets
+        success {
+            echo "Deployment successful! Check http://${EC2_IP}"
+        }
+        failure {
+            echo "Deployment failed. Check logs."
+        }
     }
 }
