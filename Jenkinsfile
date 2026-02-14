@@ -32,25 +32,19 @@ pipeline {
         stage('Deploy') {
             steps {
                 sh '''
-                    echo "=== SUPER AGGRESSIVE PORT CLEANUP ==="
+                    echo "=== AGGRESSIVE CLEANUP ==="
                     docker stop mongo backend frontend 2>/dev/null || true
                     docker rm -f mongo backend frontend 2>/dev/null || true
                     docker rm -f $(docker ps -a -q) 2>/dev/null || true
                     
-                    echo "=== CURRENT PORTS BEFORE KILL ==="
-                    ss -tlnp | grep -E '5000|80' || echo "No ports bound"
-                    
-                    echo "=== KILLING ANY PROCESS ON 5000 & 80 ==="
-                    for port in 5000 80; do
-                        PID=$(ss -tlnp | grep ":$port " | awk '{print $7}' | cut -d, -f2 | cut -d= -f2 || true)
-                        if [ -n "$PID" ]; then
-                            echo "Killing PID $PID on port $port"
-                            kill -9 $PID 2>/dev/null || true
-                        fi
+                    echo "=== KILLING PORTS 5001, 5000, 80 ==="
+                    for port in 5001 5000 80; do
+                        fuser -k ${port}/tcp 2>/dev/null || true
+                        sleep 1
                     done
                     
-                    echo "=== WAITING FOR PORTS TO FULLY FREE (15s) ==="
-                    sleep 15
+                    echo "=== WAITING 10s FOR PORTS ==="
+                    sleep 10
                     
                     echo "=== CREATING NETWORK ==="
                     docker network create expense-net 2>/dev/null || true
@@ -59,7 +53,7 @@ pipeline {
                     docker run -d --restart unless-stopped --name mongo --network expense-net mongo:latest
                     
                     echo "=== WAITING FOR MONGODB ==="
-                    for i in {1..40}; do
+                    for i in {1..30}; do
                         if docker run --rm --network expense-net busybox sh -c "nc -z mongo 27017" 2>/dev/null; then
                             echo "MongoDB ready!"
                             break
@@ -67,10 +61,10 @@ pipeline {
                         sleep 1
                     done
                     
-                    echo "=== STARTING BACKEND ==="
+                    echo "=== STARTING BACKEND (on host port 5001) ==="
                     docker run -d --restart unless-stopped --name backend \
                         --network expense-net \
-                        -p 5000:5000 \
+                        -p 5001:5000 \
                         -e MONGO_URI=mongodb://mongo:27017/expense-tracker \
                         -e JWT_SECRET=${JWT_SECRET} \
                         -e PORT=5000 \
@@ -82,20 +76,19 @@ pipeline {
                         -p 80:80 \
                         sarasii/expense-frontend:latest
                     
-                    echo "=== FINAL STATUS ==="
+                    echo "=== DEPLOYMENT COMPLETE ==="
                     docker ps
-                    echo "APP LIVE AT: http://$(curl -s ifconfig.me)"
-                    echo "Backend check: $(curl -s -o /dev/null -w "%{http_code}" http://localhost:5000 || echo "DOWN")"
+                    echo "YOUR APP IS LIVE AT: http://$(curl -s ifconfig.me)"
+                    echo "Backend health: $(curl -s -o /dev/null -w "%{http_code}" http://localhost:5001 || echo "DOWN")"
                 '''
             }
         }
     }
     post {
-        success { echo '✅ SUCCESS — CHECK THE URL ABOVE!' }
+        success { echo '✅ SUCCESS! Open the URL above in browser' }
         failure { 
             echo '❌ FAILED'
             sh 'docker logs backend || true'
-            sh 'ss -tlnp | grep -E "5000|80" || true'
         }
     }
 }
