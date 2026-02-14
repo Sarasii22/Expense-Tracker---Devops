@@ -1,0 +1,10 @@
+node_modules
+build
+.env
+*.log
+**/.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.backup
+crash.log
+.DS_Store

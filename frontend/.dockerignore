@@ -1,0 +1,10 @@
+node_modules
+npm-debug.log
+.git
+.gitignore
+*.md
+*.log
+.env  # If any
+build/  # Exclude build dir (but it's generated, so optional)
+Dockerfile
+nginx.conf  # Exclude if not needed in final image
