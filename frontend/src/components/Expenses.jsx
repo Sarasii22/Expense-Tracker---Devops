@@ -90,7 +90,7 @@ const Expenses = () => {
 
   return (
     <div className="dashboard-container">
-      <h2 className="mb-4">Expenses Dashboard</h2>
+      <h2 className="mb-4">Warnakula S M</h2>
       <button className="btn btn-secondary mb-3" onClick={logout}>Logout</button>
 
       <h3 className="mt-4">{editingId ? 'Update' : 'Add'} Expense</h3>
