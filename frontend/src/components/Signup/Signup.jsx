@@ -26,25 +26,64 @@ const Signup = () => {
   };
 
   return (
-    <div className="card p-4">
-      <h2 className="mb-4">Signup</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="mb-3">
-          <label className="form-label">Username</label>
-          <input type="text" name="username" className="form-control" onChange={handleChange} required />
+    <div className="signup-container">
+      <div className="signup-card">
+        <div className="card-header">
+          <div className="signup-icon">
+            <i className="fas fa-user-plus text-white"></i>
+          </div>
+          <h2 className="mb-0">Join Us Today</h2>
+          <p className="signup-subtitle">Start tracking your expenses effortlessly</p>
         </div>
-        <div className="mb-3">
-          <label className="form-label">Email</label>
-          <input type="email" name="email" className="form-control" onChange={handleChange} required />
+        <div className="card-body">
+          <form onSubmit={handleSubmit}>
+            <div className="mb-3">
+              <label className="form-label">
+                <i className="fas fa-user me-2"></i>Username
+              </label>
+              <input 
+                type="text" 
+                name="username" 
+                className="form-control form-control-lg" 
+                onChange={handleChange} 
+                required 
+              />
+            </div>
+            <div className="mb-3">
+              <label className="form-label">
+                <i className="fas fa-envelope me-2"></i>Email
+              </label>
+              <input 
+                type="email" 
+                name="email" 
+                className="form-control form-control-lg" 
+                onChange={handleChange} 
+                required 
+              />
+            </div>
+            <div className="mb-3">
+              <label className="form-label">
+                <i className="fas fa-lock me-2"></i>Password
+              </label>
+              <input 
+                type="password" 
+                name="password" 
+                className="form-control form-control-lg" 
+                onChange={handleChange} 
+                required 
+                minLength="6" 
+              />
+            </div>
+            <button type="submit" className="btn btn-primary btn-lg w-100">
+              <i className="fas fa-rocket me-2"></i>Get Started
+            </button>
+          </form>
+          {message && <div className={`mt-3 alert alert-${message.includes('successful') ? 'success' : 'danger'}`} role="alert">{message}</div>}
+          <div className="mt-4 text-center">
+            <p>Already have an account? <a href="/login" className="text-primary fw-semibold">Sign In</a></p>
+          </div>
         </div>
-        <div className="mb-3">
-          <label className="form-label">Password</label>
-          <input type="password" name="password" className="form-control" onChange={handleChange} required minLength="6" />
-        </div>
-        <button type="submit" className="btn btn-primary">Signup</button>
-      </form>
-      {message && <p className="mt-3 alert alert-info">{message}</p>}
-      <p className="mt-3">Already have an account? <a href="/login">Login</a></p>
+      </div>
     </div>
   );
 };

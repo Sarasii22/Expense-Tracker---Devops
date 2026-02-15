@@ -26,21 +26,51 @@ const Login = () => {
   };
 
   return (
-    <div className="card p-4">
-      <h2 className="mb-4">Login</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="mb-3">
-          <label className="form-label">Email</label>
-          <input type="email" name="email" className="form-control" onChange={handleChange} required />
+    <div className="login-container">
+      <div className="login-card">
+        <div className="card-header">
+          <div className="login-icon">
+            <i className="fas fa-sign-in-alt text-white"></i>
+          </div>
+          <h2 className="mb-0">Welcome Back</h2>
+          <p className="login-subtitle">Securely access your dashboard</p>
         </div>
-        <div className="mb-3">
-          <label className="form-label">Password</label>
-          <input type="password" name="password" className="form-control" onChange={handleChange} required />
+        <div className="card-body">
+          <form onSubmit={handleSubmit}>
+            <div className="mb-3">
+              <label className="form-label">
+                <i className="fas fa-envelope me-2"></i>Email
+              </label>
+              <input 
+                type="email" 
+                name="email" 
+                className="form-control form-control-lg" 
+                onChange={handleChange} 
+                required 
+              />
+            </div>
+            <div className="mb-3">
+              <label className="form-label">
+                <i className="fas fa-lock me-2"></i>Password
+              </label>
+              <input 
+                type="password" 
+                name="password" 
+                className="form-control form-control-lg" 
+                onChange={handleChange} 
+                required 
+              />
+            </div>
+            <button type="submit" className="btn btn-primary btn-lg w-100">
+              <i className="fas fa-arrow-right me-2"></i>Sign In
+            </button>
+          </form>
+          {message && <div className={`mt-3 alert alert-${message.includes('successful') ? 'success' : 'danger'}`} role="alert">{message}</div>}
+          <div className="mt-4 text-center">
+            <p>New user? <a href="/signup" className="text-primary fw-semibold">Create Account</a></p>
+          </div>
         </div>
-        <button type="submit" className="btn btn-primary">Login</button>
-      </form>
-      {message && <p className="mt-3 alert alert-info">{message}</p>}
-      <p className="mt-3">New user? <a href="/signup">Signup</a></p>
+      </div>
     </div>
   );
 };

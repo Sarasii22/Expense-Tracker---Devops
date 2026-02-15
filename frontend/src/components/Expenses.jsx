@@ -90,110 +90,150 @@ const Expenses = () => {
 
   return (
     <div className="dashboard-container">
-      <h2 className="mb-4">Warnakula S M</h2>
-      <button className="btn btn-secondary mb-3" onClick={logout}>Logout</button>
-
-      <h3 className="mt-4">{editingId ? 'Update' : 'Add'} Expense</h3>
-      <form onSubmit={handleSubmit} className="mb-4">
-        <div className="form-group">
-          <input
-            className="form-control"
-            type="text"
-            name="description"
-            placeholder="Description"
-            value={formData.description}
-            onChange={handleChange}
-            required
-          />
+      <div className="dashboard-header">
+        <div className="header-left">
+          <i className="fas fa-wallet me-2 text-white"></i>
+          <h2 className="mb-0 text-white">Expense Tracker - Dashboard</h2>
         </div>
-        <div className="form-group">
-          <input
-            className="form-control"
-            type="number"
-            name="amount"
-            placeholder="Amount"
-            value={formData.amount}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <select
-            className="form-control"
-            name="category"
-            value={formData.category}
-            onChange={handleChange}
-            required
-          >
-            <option value="">Select Category</option>
-            {categories.map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </select>
-        </div>
-        <button type="submit" className="btn btn-primary">
-          {editingId ? 'Update' : 'Add'}
+        <button className="btn btn-outline-secondary" onClick={logout}>
+          <i className="fas fa-sign-out-alt me-2"></i>Logout
         </button>
-      </form>
+      </div>
 
-      <h3>Filters</h3>
-      <div className="row mb-3">
-        <div className="col-md-4">
-          <select className="form-control" value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
-            <option value="All">All Categories</option>
-            {categories.map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </select>
+      <div className="expense-card">
+        <div className="card-header">
+          <h3 className="mb-0"><i className="fas fa-plus-circle me-2"></i>{editingId ? 'Update' : 'Add'} Expense</h3>
         </div>
-        <div className="col-md-4">
-          <select className="form-control" value={periodFilter} onChange={(e) => setPeriodFilter(e.target.value)}>
-            <option value="All">All Periods</option>
-            <option value="Today">Today</option>
-            <option value="This Week">This Week</option>
-            <option value="This Month">This Month</option>
-          </select>
-        </div>
-        <div className="col-md-4">
-          <button className="btn btn-outline-primary w-100" onClick={handleViewAll}>View All Expenses</button>
+        <div className="card-body">
+          <form onSubmit={handleSubmit}>
+            <div className="row">
+              <div className="col-md-4 mb-3">
+                <input
+                  className="form-control form-control-lg"
+                  type="text"
+                  name="description"
+                  placeholder="Description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div className="col-md-3 mb-3">
+                <input
+                  className="form-control form-control-lg"
+                  type="number"
+                  name="amount"
+                  placeholder="Amount"
+                  value={formData.amount}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div className="col-md-3 mb-3">
+                <select
+                  className="form-control form-control-lg"
+                  name="category"
+                  value={formData.category}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Select Category</option>
+                  {categories.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="col-md-2 mb-3">
+                <button type="submit" className="btn btn-primary btn-lg w-100">
+                  <i className="fas fa-save me-2"></i>{editingId ? 'Update' : 'Add'}
+                </button>
+              </div>
+            </div>
+          </form>
         </div>
       </div>
 
-      <h3>Expense Table</h3>
-      <table className="table table-striped table-hover">
-        <thead className="thead-dark">
-          <tr>
-            <th>Date/Time</th>
-            <th>Description</th>
-            <th>Amount</th>
-            <th>Category</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {expenses.map((exp) => (
-            <tr key={exp._id}>
-              <td>{new Date(exp.date).toLocaleString()}</td>
-              <td>{exp.description}</td>
-              <td>${exp.amount}</td>
-              <td>
-                <span className={getCategoryBadgeClass(exp.category)}>{exp.category}</span>
-              </td>
-              <td>
-                <button className="btn btn-sm btn-warning mr-5" onClick={() => handleEdit(exp)}>Edit</button>
-                <button className="btn btn-sm btn-danger" onClick={() => handleDelete(exp._id)}>Delete</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div className="filters-card">
+        <div className="card-header">
+          <h3 className="mb-0"><i className="fas fa-filter me-2"></i>Filters</h3>
+        </div>
+        <div className="card-body">
+          <div className="row">
+            <div className="col-md-4 mb-2">
+              <select className="form-control form-control-lg" value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
+                <option value="All">All Categories</option>
+                {categories.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="col-md-4 mb-2">
+              <select className="form-control form-control-lg" value={periodFilter} onChange={(e) => setPeriodFilter(e.target.value)}>
+                <option value="All">All Periods</option>
+                <option value="Today">Today</option>
+                <option value="This Week">This Week</option>
+                <option value="This Month">This Month</option>
+              </select>
+            </div>
+            <div className="col-md-4 mb-2">
+              <button className="btn btn-outline-primary btn-lg w-100" onClick={handleViewAll}>
+                <i className="fas fa-eye me-2"></i>View All
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
 
-      <div className="total-expenses">
-        Total Expenses: ${totalExpenses}
+      <div className="table-card">
+        <div className="card-header">
+          <h3 className="mb-0"><i className="fas fa-table me-2"></i>Expense Table</h3>
+        </div>
+        <div className="card-body p-0">
+          <div className="table-responsive">
+            <table className="table table-hover mb-0">
+              <thead className="table-dark">
+                <tr>
+                  <th>Date/Time</th>
+                  <th>Description</th>
+                  <th>Amount</th>
+                  <th>Category</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {expenses.map((exp) => (
+                  <tr key={exp._id}>
+                    <td>{new Date(exp.date).toLocaleString()}</td>
+                    <td>{exp.description}</td>
+                    <td className="fw-bold text-white">${exp.amount}</td> {/* White amount */}
+                    <td>
+                      <span className={getCategoryBadgeClass(exp.category)}>{exp.category}</span>
+                    </td>
+                    <td>
+                      <button className="btn btn-sm btn-warning me-2" onClick={() => handleEdit(exp)}>
+                        <i className="fas fa-edit me-1"></i>Edit
+                      </button>
+                      <button className="btn btn-sm btn-danger" onClick={() => handleDelete(exp._id)}>
+                        <i className="fas fa-trash me-1"></i>Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div className="total-card">
+        <div className="card-body text-center">
+          <h4 className="text-white mb-0">Total Expenses: ${totalExpenses}</h4> {/* White total */}
+          <p className="text-white-50">Stay on track with your spending</p>
+        </div>
       </div>
     </div>
   );
